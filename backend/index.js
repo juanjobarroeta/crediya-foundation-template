@@ -846,8 +846,20 @@ console.log("🌐 Using DATABASE_URL:", !!process.env.DATABASE_URL);
 
 // Create tables
 const createTables = async () => {
-  // 1. Users table (must be created before any table referencing users)
   console.log("📣 Connected to DB. Creating tables...");
+  
+  // 0. Stores table (must be created FIRST - users reference it)
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS stores (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(100) NOT NULL,
+      address TEXT,
+      phone VARCHAR(20),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
+  // 1. Users table (must be created before any table referencing users)
   await pool.query(`
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
@@ -951,16 +963,6 @@ const createTables = async () => {
       total_expenses DECIMAL(12,2) DEFAULT 0,
       net_income DECIMAL(12,2) DEFAULT 0,
       created_by INTEGER REFERENCES users(id),
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-  `);
-
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS stores (
-      id SERIAL PRIMARY KEY,
-      name VARCHAR(100) NOT NULL,
-      address TEXT,
-      phone VARCHAR(20),
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
   `);
