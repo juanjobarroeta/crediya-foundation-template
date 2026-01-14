@@ -27,16 +27,19 @@ async function setupDatabase() {
     if (!checkTable.rows[0].exists) {
       console.log('📄 Applying water_inventory_schema.sql...');
       
-      // Try different paths (Railway vs local)
-      let schemaPath = path.join(__dirname, 'water_inventory_schema.sql');
+      // Schema file should be in the same directory as this script
+      const schemaPath = path.join(__dirname, 'water_inventory_schema.sql');
+      
+      console.log('📂 __dirname:', __dirname);
+      console.log('📂 Schema path:', schemaPath);
+      console.log('📂 File exists?:', fs.existsSync(schemaPath));
+      
       if (!fs.existsSync(schemaPath)) {
-        schemaPath = path.join(__dirname, '../water_inventory_schema.sql');
-      }
-      if (!fs.existsSync(schemaPath)) {
-        schemaPath = '/app/backend/water_inventory_schema.sql';
+        console.error('❌ Schema file not found! Contents of __dirname:');
+        console.error(fs.readdirSync(__dirname));
+        throw new Error(`Schema file not found at ${schemaPath}`);
       }
       
-      console.log('📂 Using schema path:', schemaPath);
       const schema = fs.readFileSync(schemaPath, 'utf8');
       
       // Split by semicolons and execute each statement
