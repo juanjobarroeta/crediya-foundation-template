@@ -5609,13 +5609,23 @@ app.post("/register", async (req, res) => {
 
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
+  console.log("🔐 Login attempt:", email);
   try {
     const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
-    if (!result.rows.length) return res.status(401).json({ message: "Invalid credentials" });
+    console.log("👤 User found:", result.rows.length > 0);
+    if (!result.rows.length) {
+      console.log("❌ No user found with email:", email);
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
 
     const user = result.rows[0];
+    console.log("🔑 Comparing password for user:", user.email, "role:", user.role);
     const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(401).json({ message: "Invalid credentials" });
+    console.log("✅ Password match:", match);
+    if (!match) {
+      console.log("❌ Password mismatch for:", email);
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
 
     const token = generateToken(user);
     res.json({ 
