@@ -877,7 +877,50 @@ const createTables = async () => {
     ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'user';
   `);
 
-  // 2. Customer Notes, Avales, and References
+  // 2. Customers table (must be created before tables that reference it)
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS customers (
+      id SERIAL PRIMARY KEY,
+      first_name VARCHAR(100),
+      last_name VARCHAR(100),
+      phone VARCHAR(20),
+      email VARCHAR(100),
+      phone_alt VARCHAR(20),
+      customer_type VARCHAR(50),
+      rfc VARCHAR(30),
+      razon_social VARCHAR(200),
+      contact_person_name VARCHAR(100),
+      contact_person_phone VARCHAR(20),
+      birthdate DATE,
+      curp VARCHAR(30),
+      address TEXT,
+      neighborhood VARCHAR(200),
+      building_type VARCHAR(100),
+      postal_code VARCHAR(10),
+      city VARCHAR(100),
+      state VARCHAR(100),
+      delivery_instructions TEXT,
+      reference_1 VARCHAR(200),
+      reference_2 VARCHAR(200),
+      reference_3 VARCHAR(200),
+      preferred_delivery_time VARCHAR(50),
+      water_consumption VARCHAR(50),
+      service_type VARCHAR(100),
+      emergency_contact_name VARCHAR(100),
+      emergency_contact_phone VARCHAR(20),
+      employment TEXT,
+      income NUMERIC,
+      notes TEXT,
+      ine_path TEXT,
+      bureau_path TEXT,
+      selfie_path TEXT,
+      video_path TEXT,
+      proof_address_path TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
+  // 3. Customer Notes, Avales, and References
   await pool.query(`
     CREATE TABLE IF NOT EXISTS customer_notes (
       id SERIAL PRIMARY KEY,
@@ -1060,82 +1103,7 @@ const createTables = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
-      CREATE TABLE IF NOT EXISTS customers (
-        id SERIAL PRIMARY KEY,
-        first_name VARCHAR(100),
-        last_name VARCHAR(100),
-        phone VARCHAR(20),
-        email VARCHAR(100),
-        phone_alt VARCHAR(20),
-        customer_type VARCHAR(50),
-        rfc VARCHAR(30),
-        razon_social VARCHAR(200),
-        contact_person_name VARCHAR(100),
-        contact_person_phone VARCHAR(20),
-        birthdate DATE,
-        curp VARCHAR(30),
-        address TEXT,
-        neighborhood VARCHAR(200),
-        building_type VARCHAR(100),
-        postal_code VARCHAR(10),
-        city VARCHAR(100),
-        state VARCHAR(100),
-        delivery_instructions TEXT,
-        reference_1 VARCHAR(200),
-        reference_2 VARCHAR(200),
-        reference_3 VARCHAR(200),
-        preferred_delivery_time VARCHAR(50),
-        water_consumption VARCHAR(50),
-        service_type VARCHAR(100),
-        emergency_contact_name VARCHAR(100),
-        emergency_contact_phone VARCHAR(20),
-        employment TEXT,
-        income NUMERIC,
-        notes TEXT,
-        ine_path TEXT,
-        bureau_path TEXT,
-        selfie_path TEXT,
-        video_path TEXT,
-        proof_address_path TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-
-      -- Add missing columns to customers table if they don't exist
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS first_name VARCHAR(100);
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS last_name VARCHAR(100);
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS phone VARCHAR(20);
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS email VARCHAR(100);
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS phone_alt VARCHAR(20);
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS customer_type VARCHAR(50);
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS rfc VARCHAR(30);
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS razon_social VARCHAR(200);
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS contact_person_name VARCHAR(100);
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS contact_person_phone VARCHAR(20);
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS birthdate DATE;
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS curp VARCHAR(30);
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS address TEXT;
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS neighborhood VARCHAR(200);
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS building_type VARCHAR(100);
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS postal_code VARCHAR(10);
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS city VARCHAR(100);
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS state VARCHAR(100);
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS delivery_instructions TEXT;
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS reference_1 VARCHAR(200);
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS reference_2 VARCHAR(200);
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS reference_3 VARCHAR(200);
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS preferred_delivery_time VARCHAR(50);
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS water_consumption VARCHAR(50);
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS service_type VARCHAR(100);
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS emergency_contact_name VARCHAR(100);
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS emergency_contact_phone VARCHAR(20);
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS employment TEXT;
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS income NUMERIC;
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS notes TEXT;
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS ine_path TEXT;
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS bureau_path TEXT;
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS selfie_path TEXT;
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS video_path TEXT;
-      ALTER TABLE customers ADD COLUMN IF NOT EXISTS proof_address_path TEXT;
+      -- Customers table already created earlier in createTables()
 
       CREATE TABLE IF NOT EXISTS inventory_requests (
         id SERIAL PRIMARY KEY,
