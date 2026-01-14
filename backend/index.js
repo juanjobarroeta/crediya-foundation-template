@@ -2049,14 +2049,19 @@ async function start() {
     
     // Run migration for existing payments (only for local dev with loan data)
     if (!process.env.DATABASE_URL && process.env.NODE_ENV !== 'production') {
+      console.log("🔄 Running payment migration...");
       await migrateExistingPayments();
+    } else {
+      console.log("⏭️  Skipping payment migration (production mode)");
     }
 
+    console.log("📋 About to log routes...");
     // Log all registered routes before starting server
     app._router.stack
       .filter(r => r.route)
       .forEach(r => console.log("📦 Registered route:", r.route.path));
 
+    console.log("✅ Routes logged!");
     console.log(`🎯 About to start server on port ${port}...`);
     
     const server = app.listen(port, '0.0.0.0', () => {
