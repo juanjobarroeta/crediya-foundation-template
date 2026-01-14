@@ -27,7 +27,16 @@ async function setupDatabase() {
     if (!checkTable.rows[0].exists) {
       console.log('📄 Applying water_inventory_schema.sql...');
       
-      const schemaPath = path.join(__dirname, 'water_inventory_schema.sql');
+      // Try different paths (Railway vs local)
+      let schemaPath = path.join(__dirname, 'water_inventory_schema.sql');
+      if (!fs.existsSync(schemaPath)) {
+        schemaPath = path.join(__dirname, '../water_inventory_schema.sql');
+      }
+      if (!fs.existsSync(schemaPath)) {
+        schemaPath = '/app/backend/water_inventory_schema.sql';
+      }
+      
+      console.log('📂 Using schema path:', schemaPath);
       const schema = fs.readFileSync(schemaPath, 'utf8');
       
       // Split by semicolons and execute each statement
