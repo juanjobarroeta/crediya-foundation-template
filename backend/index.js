@@ -2057,11 +2057,20 @@ async function start() {
       .filter(r => r.route)
       .forEach(r => console.log("📦 Registered route:", r.route.path));
 
-    app.listen(port, '0.0.0.0', () => {
-      console.log(`🚀 Backend live on port ${port}`);
+    console.log(`🎯 About to start server on port ${port}...`);
+    
+    const server = app.listen(port, '0.0.0.0', () => {
+      console.log(`✅✅✅ Backend live on port ${port} ✅✅✅`);
       console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`🗄️  Database: ${process.env.DATABASE_URL ? 'Railway PostgreSQL' : 'Local PostgreSQL'}`);
     });
+    
+    server.on('error', (err) => {
+      console.error('❌❌❌ Server error:', err);
+      process.exit(1);
+    });
+    
+    console.log(`⏳ Server starting...`);
   } catch (err) {
     console.error("❌ Error starting server:", err);
     process.exit(1);
