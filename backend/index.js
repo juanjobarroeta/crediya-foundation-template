@@ -2020,19 +2020,25 @@ async function seedTankTypes() {
 }
 
 async function start() {
+  console.log("🚀 Starting Purificadora Cuenca Azul Backend...");
+  console.log(`📍 Port: ${port}`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🗄️  Database URL set: ${!!process.env.DATABASE_URL}`);
+  
   try {
-    console.log("🚀 Starting server...");
-    
     // Use clean table creation for production/Railway
     if (process.env.DATABASE_URL || process.env.NODE_ENV === 'production') {
+      console.log("📦 Using clean production schema...");
       const createCleanTables = require('./create-tables-clean');
       await createCleanTables();
       
       // Apply water inventory schema extensions
+      console.log("💧 Applying water inventory extensions...");
       const setupDatabase = require('./setup-db');
       await setupDatabase();
     } else {
       // Local development - use existing createTables
+      console.log("🏠 Using local development schema...");
       await createTables();
     }
     
@@ -2051,8 +2057,10 @@ async function start() {
       .filter(r => r.route)
       .forEach(r => console.log("📦 Registered route:", r.route.path));
 
-    app.listen(port, () => {
-      console.log(`🚀 Backend live at http://localhost:${port}`);
+    app.listen(port, '0.0.0.0', () => {
+      console.log(`🚀 Backend live on port ${port}`);
+      console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`🗄️  Database: ${process.env.DATABASE_URL ? 'Railway PostgreSQL' : 'Local PostgreSQL'}`);
     });
   } catch (err) {
     console.error("❌ Error starting server:", err);
