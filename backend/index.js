@@ -6406,30 +6406,11 @@ app.post("/customers/upload", authenticateToken, async (req, res) => {
 // Get all customers with loan counts and balances
 app.get("/customers", authenticateToken, async (req, res) => {
   try {
+    // Simple query for water purifier customers (no loan data needed)
     const result = await pool.query(`
-      SELECT 
-        c.*,
-        COALESCE(loan_counts.loan_count, 0) as loan_count,
-        COALESCE(loan_balances.total_balance, 0)::NUMERIC as total_balance
-      FROM customers c
-      LEFT JOIN (
-        SELECT 
-          customer_id,
-          COUNT(*) as loan_count
-        FROM loans 
-        GROUP BY customer_id
-      ) loan_counts ON c.id = loan_counts.customer_id
-      LEFT JOIN (
-        SELECT 
-          l.customer_id,
-          COALESCE(SUM(li.amount_due), 0) as total_balance
-        FROM loans l
-        LEFT JOIN loan_installments li ON l.id = li.loan_id
-        WHERE l.status = 'delivered'
-          AND li.status = 'pending'
-        GROUP BY l.customer_id
-      ) loan_balances ON c.id = loan_balances.customer_id
-      ORDER BY c.created_at DESC
+      SELECT *
+      FROM customers
+      ORDER BY created_at DESC
     `);
     res.json(result.rows);
   } catch (err) {
