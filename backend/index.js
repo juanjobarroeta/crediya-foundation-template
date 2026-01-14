@@ -2057,6 +2057,12 @@ async function start() {
     await createTables();
     console.log("✅ Database tables created/verified");
     
+    // Apply water inventory schema extensions
+    if (process.env.DATABASE_URL || process.env.NODE_ENV === 'production') {
+      const setupDatabase = require('./setup-db');
+      await setupDatabase();
+    }
+    
     // Seed default tank types
     await seedTankTypes();
     

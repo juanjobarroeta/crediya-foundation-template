@@ -11,30 +11,46 @@ async function setupDatabase() {
   });
 
   try {
-    // Read the schema file
-    const schemaPath = path.join(__dirname, 'water_inventory_schema.sql');
-    const schema = fs.readFileSync(schemaPath, 'utf8');
+    // Note: Base tables (users, customers, etc.) are created by the main index.js createTables()
+    // This script only applies water inventory extensions
     
-    console.log('📄 Applying water_inventory_schema.sql...');
+    console.log('📄 Checking for water inventory tables...');
     
-    // Split by semicolons and execute each statement
-    const statements = schema
-      .split(';')
-      .map(s => s.trim())
-      .filter(s => s.length > 0 && !s.startsWith('--'));
+    // Check if water_tank_types table exists
+    const checkTable = await pool.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_name = 'water_tank_types'
+      );
+    `);
     
-    for (const statement of statements) {
-      try {
-        await pool.query(statement);
-      } catch (err) {
-        // Ignore errors for tables that already exist
-        if (err.code !== '42P07' && err.code !== '42710') {
-          console.warn('⚠️ Schema warning:', err.message.substring(0, 100));
+    if (!checkTable.rows[0].exists) {
+      console.log('📄 Applying water_inventory_schema.sql...');
+      
+      const schemaPath = path.join(__dirname, 'water_inventory_schema.sql');
+      const schema = fs.readFileSync(schemaPath, 'utf8');
+      
+      // Split by semicolons and execute each statement
+      const statements = schema
+        .split(';')
+        .map(s => s.trim())
+        .filter(s => s.length > 0 && !s.startsWith('--'));
+      
+      for (const statement of statements) {
+        try {
+          await pool.query(statement);
+        } catch (err) {
+          // Ignore errors for tables that already exist
+          if (err.code !== '42P07' && err.code !== '42710') {
+            console.warn('⚠️ Schema warning:', err.message.substring(0, 100));
+          }
         }
       }
+      
+      console.log('✅ Water inventory schema setup complete!');
+    } else {
+      console.log('✅ Water inventory tables already exist, skipping...');
     }
-    
-    console.log('✅ Database schema setup complete!');
     
   } catch (error) {
     console.error('❌ Error setting up database:', error.message);
