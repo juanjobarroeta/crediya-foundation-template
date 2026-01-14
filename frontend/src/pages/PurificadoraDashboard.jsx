@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import Header from "../components/Header";
+import ModernLayout from "../components/ModernLayout";
 import { API_BASE_URL } from "../utils/constants";
 
 const PurificadoraDashboard = () => {
@@ -53,23 +53,20 @@ const PurificadoraDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-cyan-50 to-blue-100">
-        <Header />
-        <div className="flex items-center justify-center h-screen">
+      <ModernLayout>
+        <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-cyan-600 mx-auto"></div>
             <p className="mt-4 text-gray-600">Cargando dashboard...</p>
           </div>
         </div>
-      </div>
+      </ModernLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-50 to-blue-100">
-      <Header />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <ModernLayout>
+      <div className="space-y-6">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
@@ -189,7 +186,7 @@ const PurificadoraDashboard = () => {
           </p>
         </div>
       </div>
-    </div>
+    </ModernLayout>
   );
 };
 
