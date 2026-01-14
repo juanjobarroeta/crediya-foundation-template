@@ -2,6 +2,8 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import ModernDashboard from "./pages/ModernDashboard";
+import PurificadoraDashboard from "./pages/PurificadoraDashboard";
 import AdminPanel from "./pages/AdminPanel";
 import CustomerPage from "./pages/CustomerPage";
 import CustomerProfile from "./pages/CustomerProfile";
@@ -25,7 +27,7 @@ import AdminManualEntry from "./pages/AdminManualEntry";
 import Tesoreria from "./pages/Tesorería";
 import ReclassifyPayment from "./pages/ReclassifyPayment";
 import IncomeStatement from "./pages/IncomeStatement";
-import RecepcionInventario from "./pages/RecepcionInventario";
+
 import AssignIMEI from "./pages/AssignIMEI";
 import GenerateContract from "./pages/GenerateContract";
 import LoanQuotes from "./pages/LoanQuotes";
@@ -35,8 +37,11 @@ import InvestigationsDashboard from "./pages/InvestigationsDashboard";
 import InvestigationStepper from "./pages/InvestigationStepper";
 import OverdueLoans from "./pages/OverdueLoans";
 import LoansDashboard from "./pages/LoansDashboard";
-import AccountingAdmin from "./pages/AccountingAdmin";
+
 import LoanDetails from "./pages/LoanDetails";
+import LoanResolution from "./pages/LoanResolution";
+import UnifiedLoanSystem from "./pages/UnifiedLoanSystem";
+import LoanStatusManager from "./pages/LoanStatusManager";
 import LoanApplicationDetails from "./components/LoanApplicationDetails";
 import CollectionsDashboard from "./pages/CollectionsDashboard";
 import ProductProfile from "./pages/ProductProfile";
@@ -44,23 +49,45 @@ import CreateUser from "./pages/CreateUser";
 import StoreDashboard from "./pages/StoreDashboard";
 import BudgetManagement from "./pages/BudgetManagement";
 import AccountingHub from "./pages/AccountingHub";
-import UnifiedLoanSystem from "./pages/UnifiedLoanSystem";
-import LoanResolution from "./pages/LoanResolution";
-import LoanStatusManager from "./pages/LoanStatusManager";
-import UserManagement from "./pages/UserManagement";
-import StoreManagement from "./pages/StoreManagement";
+import Orders from "./pages/Orders";
+import CreateOrder from "./pages/CreateOrder";
+import PrintQRLabels from "./pages/PrintQRLabels";
+import QRScanner from "./pages/QRScanner";
+import FillingStation from "./pages/FillingStation";
+import AccountsReceivable from "./pages/AccountsReceivable";
+import CustomerStatement from "./pages/CustomerStatement";
+import CustomerLogin from "./pages/CustomerLogin";
+import CustomerDashboard from "./pages/CustomerDashboard";
+import CustomerOrders from "./pages/CustomerOrders";
+import CustomerAccountStatement from "./pages/CustomerAccountStatement";
+import CustomerNewOrder from "./pages/CustomerNewOrder";
+import CustomerSupport from "./pages/CustomerSupport";
+import DeliveryConfirmation from "./pages/DeliveryConfirmation";
+import TankReturns from "./pages/TankReturns";
 
-// DEVELOPMENT MODE: Bypass authentication
 const ProtectedRoute = ({ children }) => {
-  // For development, always allow access
-  console.log("🔓 DEV MODE: Bypassing authentication");
-  return children;
+  const token = localStorage.getItem("token");
+
+  if (!token) return <Navigate to="/auth" replace />;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    if (!payload || !payload.id) throw new Error("Invalid token payload");
+    return children;
+  } catch {
+    return <Navigate to="/auth" replace />;
+  }
 };
 
 const AdminRoute = ({ children }) => {
-  // For development, always allow admin access
-  console.log("🔓 DEV MODE: Bypassing admin authentication");
-  return children;
+  const token = localStorage.getItem("token");
+  if (!token) return <Navigate to="/auth" replace />;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    if (payload.role !== "admin") return <Navigate to="/dashboard" replace />;
+    return children;
+  } catch {
+    return <Navigate to="/auth" replace />;
+  }
 };
 
 const AppRouter = () => (
@@ -68,8 +95,7 @@ const AppRouter = () => (
     <Routes>
       <Route path="/investigation" element={<LoanRequest />} />
       <Route path="/investigation-stepper" element={<InvestigationStepper />} />
-      {/* DEVELOPMENT: Redirect auth to dashboard */}
-      <Route path="/auth" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/auth" element={<Auth />} />
       <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
       <Route path="/customer/:id" element={<ProtectedRoute><CustomerProfile /></ProtectedRoute>} />
       <Route path="/financial-products" element={<ProtectedRoute><FinancialProducts /></ProtectedRoute>} />
@@ -85,14 +111,33 @@ const AppRouter = () => (
         }
       />
       <Route path="/accounting" element={<AdminRoute><AccountingEntries /></AdminRoute>} />
-      <Route path="/admin/accounting" element={<AdminRoute><AccountingAdmin /></AdminRoute>} />
+
       <Route path="/register-payment" element={<ProtectedRoute><RegisterPayment /></ProtectedRoute>} />
       <Route path="/loans/:id/statement" element={<ProtectedRoute><LoanStatement /></ProtectedRoute>} />
       <Route path="/loans/:loan_id/details" element={<ProtectedRoute><LoanDetails /></ProtectedRoute>} />
+      <Route path="/loans/:loan_id/resolution" element={<AdminRoute><LoanResolution /></AdminRoute>} />
+      <Route path="/loans/:loan_id/status" element={<ProtectedRoute><LoanStatusManager /></ProtectedRoute>} />
+      <Route path="/loans/unified" element={<ProtectedRoute><UnifiedLoanSystem /></ProtectedRoute>} />
+      <Route path="/loans/unified/:loan_id" element={<ProtectedRoute><UnifiedLoanSystem /></ProtectedRoute>} />
       <Route path="/crm" element={<ProtectedRoute><CustomerDirectory /></ProtectedRoute>} />
       <Route path="/registro" element={<PublicRegister />} />
       <Route path="/admin/promotions" element={<AdminRoute><AdminPromotions /></AdminRoute>} />
       <Route path="/admin/expenses" element={<AdminRoute><AdminExpenses /></AdminRoute>} />
+      <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+      <Route path="/orders/create" element={<ProtectedRoute><CreateOrder /></ProtectedRoute>} />
+      <Route path="/delivery/:orderId" element={<ProtectedRoute><DeliveryConfirmation /></ProtectedRoute>} />
+      <Route path="/tank-returns" element={<ProtectedRoute><TankReturns /></ProtectedRoute>} />
+      <Route path="/filling-station" element={<ProtectedRoute><FillingStation /></ProtectedRoute>} />
+      <Route path="/print-qr-labels" element={<ProtectedRoute><PrintQRLabels /></ProtectedRoute>} />
+      <Route path="/qr-scanner" element={<ProtectedRoute><QRScanner /></ProtectedRoute>} />
+      <Route path="/accounts-receivable" element={<ProtectedRoute><AccountsReceivable /></ProtectedRoute>} />
+      <Route path="/customers/:customer_id/statement" element={<ProtectedRoute><CustomerStatement /></ProtectedRoute>} />
+      <Route path="/customer/login" element={<CustomerLogin />} />
+      <Route path="/customer/dashboard" element={<CustomerDashboard />} />
+      <Route path="/customer/orders" element={<CustomerOrders />} />
+      <Route path="/customer/statement" element={<CustomerAccountStatement />} />
+      <Route path="/customer/new-order" element={<CustomerNewOrder />} />
+      <Route path="/customer/support" element={<CustomerSupport />} />
       <Route path="/loans" element={<ProtectedRoute><LoansDashboard /></ProtectedRoute>} />
       <Route path="/admin/budgets" element={<AdminRoute><BudgetManagement /></AdminRoute>} />
       <Route path="/admin/profit" element={<AdminRoute><ProfitSummary /></AdminRoute>} />
@@ -127,9 +172,7 @@ const AppRouter = () => (
       />
       <Route path="/admin/manual-entry" element={<AdminRoute><AdminManualEntry /></AdminRoute>} />
       <Route path="/admin/tesoreria" element={<AdminRoute><Tesoreria /></AdminRoute>} />
-      <Route path="/admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
-      <Route path="/admin/stores" element={<AdminRoute><StoreManagement /></AdminRoute>} />
-      <Route path="/warehouse/reception" element={<ProtectedRoute><RecepcionInventario /></ProtectedRoute>} />
+
       <Route
         path="/income-statement"
         element={
@@ -143,8 +186,8 @@ const AppRouter = () => (
       <Route path="/loan-quotes" element={<ProtectedRoute><LoanQuotes /></ProtectedRoute>} />
       <Route path="/admin/investigations" element={<AdminRoute><InvestigationsDashboard /></AdminRoute>} />
       <Route path="/admin/overdue-loans" element={<AdminRoute><OverdueLoans /></AdminRoute>} />
-      {/* DEVELOPMENT: Dashboard is now the main entry point */}
-      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      <Route path="/dashboard" element={<ProtectedRoute><PurificadoraDashboard /></ProtectedRoute>} />
+      <Route path="/dashboard/classic" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/dashboard/store-dashboard" element={<AdminRoute><StoreDashboard /></AdminRoute>} />
       <Route path="/admin/reclassify-payment" element={<AdminRoute><ReclassifyPayment /></AdminRoute>} />
       <Route path="/accounting-hub" element={<AdminRoute><AccountingHub /></AdminRoute>} />
@@ -157,17 +200,11 @@ const AppRouter = () => (
         }
       />
       <Route path="/admin/create-user" element={<AdminRoute><CreateUser /></AdminRoute>} />
-      
-      {/* Recovered State-of-the-Art Loan System Routes */}
-      <Route path="/loans/unified" element={<ProtectedRoute><UnifiedLoanSystem /></ProtectedRoute>} />
-      <Route path="/loans/unified/:loan_id" element={<ProtectedRoute><UnifiedLoanSystem /></ProtectedRoute>} />
-      <Route path="/loans/:loan_id/resolution" element={<ProtectedRoute><LoanResolution /></ProtectedRoute>} />
-      <Route path="/loans/:loan_id/status" element={<ProtectedRoute><LoanStatusManager /></ProtectedRoute>} />
-      
-      {/* DEVELOPMENT: Redirect everything to dashboard instead of auth */}
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<Navigate to="/auth" replace />} />
     </Routes>
   </Router>
 );
 
+
+     
 export default AppRouter;
