@@ -2022,20 +2022,29 @@ async function seedTankTypes() {
 async function start() {
   try {
     console.log("🚀 Starting server...");
-    await createTables();
-    console.log("✅ Database tables created/verified");
     
-    // Apply water inventory schema extensions
+    // Use clean table creation for production/Railway
     if (process.env.DATABASE_URL || process.env.NODE_ENV === 'production') {
+      const createCleanTables = require('./create-tables-clean');
+      await createCleanTables();
+      
+      // Apply water inventory schema extensions
       const setupDatabase = require('./setup-db');
       await setupDatabase();
+    } else {
+      // Local development - use existing createTables
+      await createTables();
     }
+    
+    console.log("✅ Database tables created/verified");
     
     // Seed default tank types
     await seedTankTypes();
     
-    // Run migration for existing payments
-    await migrateExistingPayments();
+    // Run migration for existing payments (only for local dev with loan data)
+    if (!process.env.DATABASE_URL && process.env.NODE_ENV !== 'production') {
+      await migrateExistingPayments();
+    }
 
     // Log all registered routes before starting server
     app._router.stack
